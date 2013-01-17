@@ -11,6 +11,14 @@ setup(name="Py-X",
       author="Per Fagrell",
       author_email="per.fagrell@gmail.com",
       license="PSF",
+      test_suite="nose.collector",
+      tests_require=[
+          "pyhamcrest",
+          "mock",
+          "lettuce"
+      ],
+      install_requires=[
+      ],
       classifiers = [
           'Development Status :: 1 - Pre-alpha',
           'Intended Audience :: Developers',

@@ -20,28 +20,29 @@ by existing standard solutions such as Jenkins etc.
   Scenario: Simple tests
     Given a yaml test suite like this:
        """
-       Various_tests
-       -------------
-         -
-           name: passing_test
-           status: passed
-         -
-           name: failing_test
-           status: failed
-           message: Test failed
-         -
-           name: errord_test
-           status: error
-           message: Test error
-         -
-           name: skipped_test
-           status: skipped
-           message: Not implemented yet
+      "Various_tests"
+      "-------------"
+      "   -"
+      "     name: passing_test"
+      "     status: passed"
+      "   -"
+      "     name: failing_test"
+      "     status: failed"
+      "     message: Test failed"
+      "   -"
+      "     name: errord_test"
+      "     status: error"
+      "     message: Test error"
+      "   -"
+      "     name: skipped_test"
+      "     status: skipped"
+      "     message: Not implemented yet"
+      "
         """
       When I convert it to XML
       Then I should get a test-suite called "Various_tests"
       And it should report 4 tests
       And it should report 1 error
-      And it should report 1 failure
+      And it should report 1 failed
       And it should report 1 skipped
 
