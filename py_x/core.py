@@ -5,15 +5,18 @@ class Xunit(object):
     """Top-level representation of an Xunit test run. Outputs appropriate XML"""
     def __init__(self, suite=None):
         self.suites = []
-        self.total_test_count = 0
         self.total_time = 0
         if suite is not None:
             self.suites += [suite]
-            self.total_test_count += suite.test_count
 
     def append(self, test_suite):
         """Add a test-suite and aggregate its results"""
-        self.total_test_count += test_suite.test_count
+        self.suites.append(test_suite)
+    
+    @property
+    def total_test_count(self):
+        """The total number of tests contained in all suites"""
+        return sum([suite.test_count for suite in self.suites])
 
     def to_xml(self):
         """Create a string containing the XML representation of this 
@@ -62,6 +65,8 @@ class XunitSuite(object):
         """The number of tests that are marked as 'Passed'"""
         return self.test_count
     
+    def __repr__(self):
+        return "<XunitSuite[%s] 0x%x>" % (self.name, id(self))
 
 class XunitTest(object):
     """The status report of a single test"""

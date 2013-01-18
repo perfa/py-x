@@ -1,7 +1,7 @@
 """Copyright 2013 - Per Fagrell"""
 from unittest import TestCase
 from mock import Mock
-from hamcrest import assert_that, is_, contains_string
+from hamcrest import assert_that, is_, contains_string, has_item
 
 from py_x.core import Xunit, XunitSuite, XunitTest
 
@@ -151,6 +151,19 @@ class TestXunit(TestCase):
         results.append(suite)
         assert_that(results.total_test_count, is_(4))
 
+        suite.append(test_mock)
+        assert_that(results.total_test_count, is_(6))
+
+    def test_should_aggregate_all_suite_names(self):
+        suite = XunitSuite("name")
+        suite2 = XunitSuite("other name")
+        results = Xunit()
+
+        results.append(suite)
+        results.append(suite2)
+        names = [x.name for x in results.suites]
+        assert_that(names, has_item("name"))
+        assert_that(names, has_item("other name"))
         
     def test_should_create_valid_xml_document_as_output(self):
         result = Xunit(suite_mock())

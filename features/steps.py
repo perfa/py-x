@@ -44,8 +44,13 @@ def and_it_should_report_4_tests(step):
 
 @step(u'And it should report 1 (error|skipped|failed)')
 def and_it_should_report_1_error(step, status):
+    if hasattr(world, "suite"):
+        suite = world.suite
+    else:
+        suite = world.CurrentXml.suites[0]
+
     attribute = status + "_count"
-    count = getattr(world.suite, attribute)
+    count = getattr(suite, attribute)
     assert_that(count, is_(1))
     
 @step(u'Given an empty XunitSuite name "([^"]*)"')
