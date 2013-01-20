@@ -1,6 +1,6 @@
 """Copyright 2013 - Per Fagrell"""
 from unittest import TestCase
-from hamcrest import assert_that, is_, has_length
+from hamcrest import assert_that, is_, has_length, contains_string
 
 from py_x import from_yaml
 import py_x
@@ -36,3 +36,40 @@ class TestFromYaml(object):
         result = from_yaml(input)
 
         assert_that(result.total_test_count, is_(1))
+
+    def test_should_mark_tests_with_failed_status_as_such(self):
+        input = """
+        - yaml_test_suite:
+            -
+             name: failing_test
+             status: failed
+             message: I had a failure
+        """
+        result = from_yaml(input)
+
+        assert_that(result.suites[0].failed_count, is_(1))
+
+    def test_should_mark_tests_with_error_status_as_such(self):
+        input = """
+        - yaml_test_suite:
+            -
+             name: erronous_test
+             status: error
+             message: I had an error
+        """
+        result = from_yaml(input)
+
+        assert_that(result.suites[0].error_count, is_(1))
+
+
+    def test_should_mark_tests_with_skipped_status_as_such(self):
+        input = """
+        - yaml_test_suite:
+            -
+             name: known_bad_test
+             status: skipped
+             message: I'm known bad
+        """
+        result = from_yaml(input)
+
+        assert_that(result.suites[0].skipped_count, is_(1))

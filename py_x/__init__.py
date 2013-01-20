@@ -16,7 +16,10 @@ def from_yaml(yaml_input):
             continue 
 
         for test in data:
-            suite.append(XunitTest(test['name']))
+            test_result = XunitTest(test['name'])
+            if 'status' in test:
+                test_result.status = test['status']
+            suite.append(test_result)
 
     return report
 
