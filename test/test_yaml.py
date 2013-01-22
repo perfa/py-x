@@ -1,4 +1,3 @@
-"""Copyright 2013 - Per Fagrell"""
 from unittest import TestCase
 from hamcrest import assert_that, is_, has_length, contains_string
 

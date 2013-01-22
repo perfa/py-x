@@ -22,3 +22,32 @@ Feature: Output is valid XUnit XML.
     And it has a testsuites node as root
     And it contains one test-suite named "test_suite_no_1"
     And it contains one test-suite named "test_suite_no_2"
+
+  Scenario: A test-suite with tests reports and appends them correctly.
+    Given the following yaml:
+    """
+    - test_suite_1:"
+    "  -"
+    "    name: test"
+    "  -"
+    "    name: errord_test"
+    "    status: error"
+    "    message: caused an error"
+    "  -"
+    "    name: failed_test"
+    "    status: failed"
+    "    message: caused some failure"
+    "  -"
+    "    name: skipped_test"
+    "    status: skipped"
+    "    message: not implemented yet
+    """
+    When I convert it to XML
+    Then it is valid according to the schema
+    And the test-suite has the following attributes:
+      |name      |value  |
+      |tests     |4      |
+      |errors    |1      |
+      |failures  |1      |
+      |skipped   |1      |
+    And it contains 4 test tags

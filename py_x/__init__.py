@@ -1,6 +1,8 @@
-"""Copyright 2013 - Per Fagrell """
 import yaml
 from py_x.core import Xunit, XunitSuite, XunitTest
+
+__author__ = "Per Fagrell"
+
 
 def from_yaml(yaml_input):
     """Parse provided yaml and instantiate an Xunit object from that"""

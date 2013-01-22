@@ -2,7 +2,7 @@
 import os
 from lxml import etree
 from lettuce import step, world, before
-from hamcrest import assert_that, is_, has_item
+from hamcrest import assert_that, is_, has_item, has_length
 import py_x
 
 XSD_FILE = os.path.join(os.path.dirname(__file__), '..', 'py_x', 'data', 'xunit.xsd')
@@ -14,6 +14,19 @@ PARSER = etree.XMLParser(schema=SCHEMA)
 def setup(feature):
     world.CurrentYaml = None
     world.CurrentXml = None
+
+
+@step(u'And the test-suite has the following attributes:')
+def and_the_test_suite_has_the_following_attributes(step):
+    for attribute_dict in step.hashes:
+        name = attribute_dict['name']
+        value = attribute_dict['value']
+        assert_that(world.e_xml.attrib[name], is_(value),
+                   'Expected attribute "%s" to be "%s"' % (name, value))
+
+@step(u'And it contains (\d+) test tags?')
+def and_it_contains_x_test_tags(step, count):
+    assert_that(world.e_xml.xpath('//testcase'), has_length(int(count)))
 
 @step(u'Given the following yaml:')
 def given_the_following_yaml(step):

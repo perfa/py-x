@@ -1,5 +1,6 @@
-"""Copyright 2013 - Per Fagrell"""
 from lxml import etree
+
+__author__ = "Per Fagrell"
 
 
 class Xunit(object):
@@ -54,12 +55,16 @@ class XunitSuite(object):
         node.attrib['skipped'] = str(self.skipped_count)
         node.attrib['time'] = str(self.total_time)
         node.attrib['hostname'] = 'localhost'
+
         if id is not None:
             node.attrib['id'] = str(id)
         if self.package:
             node.attrib['package'] = str(self.package)
         elif force_package:
             node.attrib['package'] = ""
+
+        for test in self._tests:
+            node.append(test.to_xml())
         return node
 
     def append(self, test):
@@ -112,6 +117,14 @@ class XunitTest(object):
             self.status = "failed"
         elif skipped:
             self.status = "skipped"
+
+    def to_xml(self):
+        """Create the XML representation of this Xunit test"""
+        node = etree.Element("testcase")
+        node.attrib['name'] = self.name
+        node.attrib['classname'] = ""
+        node.attrib['time'] = str(self.time)
+        return node
 
     @property
     def passed(self):

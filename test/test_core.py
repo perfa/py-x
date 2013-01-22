@@ -1,4 +1,3 @@
-"""Copyright 2013 - Per Fagrell"""
 import os
 from unittest import TestCase
 from lxml import etree
@@ -23,6 +22,7 @@ def suite_mock(count=2):
 def test_mock(status="passed"):
     test = Mock(XunitTest)
     test.status = status
+    test.to_xml.return_value = etree.Element("testcase")
     test.time = 1.5
     return test
 
@@ -66,6 +66,36 @@ class TestXunitTest(TestCase):
         test = XunitTest("failed_test", failed=True)
         assert_that(test.status, is_("failed"))
         assert_that(test.passed, is_(False))
+
+    def test_should_generate_xml_node_with_testcase_tag(self):
+        test = XunitTest("test")
+        xml = test.to_xml()
+        assert_that(xml.tag, is_("testcase"))
+        
+    def test_should_report_test_name_in_xml_as_name_attribute(self):
+        test = XunitTest("test")
+        xml = test.to_xml()
+        assert_that(xml.attrib['name'], is_("test"))
+
+        test = XunitTest("Nescobar_aloplop")
+        xml = test.to_xml()
+        assert_that(xml.attrib['name'], is_("Nescobar_aloplop"))
+        
+    def test_should_report_test_class_in_xml_as_class_attribute(self):
+        test = XunitTest("test")
+        xml = test.to_xml()
+        # TODO: we don't have a class attribute yet 
+        assert_that(xml.attrib['classname'], is_(""))
+
+    def test_should_reporttime_in_xml_as_time_attribute(self):
+        test = XunitTest("test")
+        xml = test.to_xml()
+        assert_that(xml.attrib['time'], is_("0.0"))
+
+        test = XunitTest("test", time=4.4)
+        xml = test.to_xml()
+        assert_that(xml.attrib['time'], is_("4.4"))
+
 
 class TestXunitSuite(TestCase):
     def test_should_have_an_name(self):
@@ -234,7 +264,7 @@ class TestXunitSuite(TestCase):
         result = suite.to_xml(force_package=True)
         assert_that(result.attrib['package'], is_(""))
 
-    def test_shold_resport_id_in_xml_tag_if_one_is_provided(self):
+    def test_should_report_id_in_xml_tag_if_one_is_provided(self):
         suite = XunitSuite("my_name")
         result = suite.to_xml(id=2)
         assert_that(result.attrib['id'], is_("2"))
@@ -242,6 +272,13 @@ class TestXunitSuite(TestCase):
         result = suite.to_xml(id=8)
         assert_that(result.attrib['id'], is_("8"))
 
+    def test_should_append_tests_to_xml_output(self):
+        suite = XunitSuite("my_name")
+        test = test_mock()
+        suite.append(test)                
+        
+        xml = suite.to_xml()
+        assert_that(xml[0], is_(test.to_xml()))
  
 class TestXunit(TestCase):
     def test_should_report_empty_test_run_as_having_zero_tests_taking_zero_seconds(self):
@@ -320,13 +357,16 @@ class TestXunit(TestCase):
         assert_that(xml, contains_string('<?xml version="1.0" encoding="UTF-8"?>'))
 
     def test_should_create_xml_that_is_valid_according_to_the_JUnit_jenkins_schema(self):
+        test = XunitTest("test1")
         suite = XunitSuite("suite1")
+        suite.append(test)
         result = Xunit()
         result.append(suite)
 
         try:
             xml = etree.fromstring(result.to_string(), PARSER)
-        except etree.XMLSyntaxError:
+        except etree.XMLSyntaxError as err:
+            print(str(err))
             self.fail("Should have parsed without errors")
         else:
             pass
