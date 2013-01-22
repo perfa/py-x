@@ -1,15 +1,30 @@
 """Copyright 2013 - Per Fagrell"""
+import os
 from unittest import TestCase
+from lxml import etree
+
 from mock import Mock
-from hamcrest import assert_that, is_, contains_string, has_item
+from hamcrest import assert_that, is_, contains_string, has_item, has_length
 
 from py_x.core import Xunit, XunitSuite, XunitTest
+
+XSD_FILE = os.path.join(os.path.dirname(__file__), '..', 'py_x', 'data', 'xunit.xsd')
+SCHEMA = etree.XMLSchema(etree.XML(open(XSD_FILE).read()))
+PARSER = etree.XMLParser(schema=SCHEMA)
 
 
 def suite_mock(count=2):
     mock = Mock(XunitSuite)
+    mock.name = "test_suite"
+    mock.to_xml.return_value = etree.Element("testsuite")
     mock.test_count = count
     return mock
+
+def test_mock(status="passed"):
+    test = Mock(XunitTest)
+    test.status = status
+    test.time = 1.5
+    return test
 
 
 class TestXunitTest(TestCase):
@@ -59,6 +74,10 @@ class TestXunitSuite(TestCase):
 
         suite = XunitSuite("tests_for_project_Y")
         assert_that(suite.name, is_("tests_for_project_Y"))
+
+    def test_may_have_a_package_name(self):
+        suite = XunitSuite("tests_in_package", package="Package1")
+        assert_that(suite.package, is_("Package1"))
 
     def test_should_aggregate_test_results(self):
         suite = XunitSuite("testsuite")
@@ -131,7 +150,99 @@ class TestXunitSuite(TestCase):
         suite.append(test1)
         assert_that(suite.total_time, is_(1.0))
 
+    def test_should_create_testsuite_node_as_xml_output(self):
+        suite = XunitSuite("testsuite")
+        result = suite.to_xml()
 
+        assert_that(result.tag, is_("testsuite"))
+
+    def test_should_report_name_in_xml_tag_as_name_attribute(self):
+        suite = XunitSuite("my_name")
+        result = suite.to_xml()
+        assert_that(result.attrib['name'], is_("my_name"))
+        
+        suite = XunitSuite("different_suite")
+        result = suite.to_xml()
+        assert_that(result.attrib['name'], is_("different_suite"))
+
+    def test_should_report_test_count_in_xml_tag_as_tests_attribute(self):
+        test = test_mock()
+        suite = XunitSuite("my_name")
+        result = suite.to_xml()
+        
+        assert_that(result.attrib['tests'], is_("0"))
+
+        suite.append(test)
+        result = suite.to_xml()
+        assert_that(result.attrib['tests'], is_("1"))
+
+    def test_should_report_failure_count_in_xml_tag_as_failures_attribute(self):
+        test = test_mock("failed")
+        suite = XunitSuite("my_name")
+        result = suite.to_xml()
+        
+        assert_that(result.attrib['failures'], is_("0"))
+
+        suite.append(test)
+        result = suite.to_xml()
+        assert_that(result.attrib['failures'], is_("1"))
+
+    def test_should_report_error_count_in_xml_tag_as_error_attribute(self):
+        test = test_mock("error")
+        suite = XunitSuite("my_name")
+        result = suite.to_xml()
+        
+        assert_that(result.attrib['errors'], is_("0"))
+
+        suite.append(test)
+        result = suite.to_xml()
+        assert_that(result.attrib['errors'], is_("1"))
+
+    def test_should_report_skip_count_in_xml_tag_as_skipped_attribute(self):
+        test = test_mock("skipped")
+        suite = XunitSuite("my_name")
+        result = suite.to_xml()
+        
+        assert_that(result.attrib['skipped'], is_("0"))
+
+        suite.append(test)
+        result = suite.to_xml()
+        assert_that(result.attrib['skipped'], is_("1"))
+
+    def test_should_report_total_time_in_xml_tag_as_time_attribute(self):
+        test = test_mock()
+        suite = XunitSuite("my_name")
+        result = suite.to_xml()
+
+        assert_that(result.attrib['time'], is_("0.0"))
+
+        suite.append(test)
+        result = suite.to_xml()
+        assert_that(result.attrib['time'], is_("1.5"))
+
+    def test_should_report_package_in_xml_tag_as_package_attribute_if_present(self):
+        suite = XunitSuite("my_name")
+        result = suite.to_xml()
+        assert_that('package' in result.attrib, is_(False), "shouldn't have package attribute")
+        
+        suite = XunitSuite("my_name", package="Pack1")
+        result = suite.to_xml()
+        assert_that(result.attrib['package'], is_("Pack1"))
+         
+    def test_should_report_empty_package_if_none_was_provided_and_force_package_is_used(self):
+        suite = XunitSuite("my_name")
+        result = suite.to_xml(force_package=True)
+        assert_that(result.attrib['package'], is_(""))
+
+    def test_shold_resport_id_in_xml_tag_if_one_is_provided(self):
+        suite = XunitSuite("my_name")
+        result = suite.to_xml(id=2)
+        assert_that(result.attrib['id'], is_("2"))
+
+        result = suite.to_xml(id=8)
+        assert_that(result.attrib['id'], is_("8"))
+
+ 
 class TestXunit(TestCase):
     def test_should_report_empty_test_run_as_having_zero_tests_taking_zero_seconds(self):
         results = Xunit()
@@ -165,9 +276,58 @@ class TestXunit(TestCase):
         assert_that(names, has_item("name"))
         assert_that(names, has_item("other name"))
         
-    def test_should_create_valid_xml_document_as_output(self):
-        result = Xunit(suite_mock())
+    def test_should_create_testsuite_tag_if_only_one_testsuite_registered(self):
+        suite = suite_mock()
+        result = Xunit(suite)
         xml = result.to_xml()
 
-        assert_that(xml.splitlines()[0], contains_string('<?xml version="1.0" encoding="UTF-8"?>'))
+        suite.to_xml.assert_called_once()
+        assert_that(xml, is_(suite.to_xml()))
+
+    def test_should_create_testsuites_root_tag_if_more_than_one_testsuite_registered(self):
+        result = Xunit()
+        result.append(suite_mock())
+        result.append(suite_mock())
+        xml = result.to_xml()
+
+        assert_that(xml.tag, is_("testsuites"))
+        assert_that([child for child in xml], has_length(2))
+
+    def test_should_force_package_inclusion_when_converting_multiple_suites_to_xml(self):
+        result = Xunit()
+        suite = suite_mock()
+        result.append(suite)
+        result.append(suite_mock())
+        xml = result.to_xml()
+        
+        suite.to_xml.assert_called_once_with(force_package=True, id=0)
+ 
+    def test_should_give_each_suite_an_id_when_converting_multiple_suites_to_xml(self):
+        result = Xunit()
+        suite = suite_mock()
+        suite2 = suite_mock()
+        result.append(suite)
+        result.append(suite2)
+        xml = result.to_xml()
+        
+        suite.to_xml.assert_called_once_with(force_package=True, id=0)
+        suite2.to_xml.assert_called_once_with(force_package=True, id=1)
+ 
+    def test_should_stringify_into_proper_xml_document(self):
+        result = Xunit()
+        xml = result.to_string()
+
+        assert_that(xml, contains_string('<?xml version="1.0" encoding="UTF-8"?>'))
+
+    def test_should_create_xml_that_is_valid_according_to_the_JUnit_jenkins_schema(self):
+        suite = XunitSuite("suite1")
+        result = Xunit()
+        result.append(suite)
+
+        try:
+            xml = etree.fromstring(result.to_string(), PARSER)
+        except etree.XMLSyntaxError:
+            self.fail("Should have parsed without errors")
+        else:
+            pass
 

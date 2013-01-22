@@ -1,4 +1,5 @@
 """Copyright 2013 - Per Fagrell"""
+from lxml import etree
 
 
 class Xunit(object):
@@ -19,17 +20,47 @@ class Xunit(object):
         return sum([suite.test_count for suite in self.suites])
 
     def to_xml(self):
+        """Create the XML representation of this Xunit object hierarchy."""
+        if len(self.suites) == 1:
+            return self.suites[0].to_xml()
+
+        node = etree.Element("testsuites") 
+        for idx, suite in enumerate(self.suites):
+            node.append(suite.to_xml(force_package=True, id=idx))
+        return node
+
+    def to_string(self):
         """Create a string containing the XML representation of this 
         Xunit object hierarchy."""
-        return '<?xml version="1.0" encoding="UTF-8"?>'
-
-    
+        res = '<?xml version="1.0" encoding="UTF-8"?>\n'
+        res += etree.tostring(self.to_xml(), pretty_print=True)
+        return res
+        
 class XunitSuite(object):
     """The status reports of a suite of tests"""
-    def __init__(self, name):
+    def __init__(self, name, package=""):
         self.name = name
+        self.package = package
         self._test_count = 0
         self._tests = []
+
+    def to_xml(self, force_package=False, id=None):
+        """Create the XML representation of this Xunit test-suite"""
+        node = etree.Element("testsuite")
+        node.attrib['name'] = str(self.name)
+        node.attrib['tests'] = str(self.test_count)
+        node.attrib['failures'] = str(self.failed_count)
+        node.attrib['errors'] = str(self.error_count)
+        node.attrib['skipped'] = str(self.skipped_count)
+        node.attrib['time'] = str(self.total_time)
+        node.attrib['hostname'] = 'localhost'
+        if id is not None:
+            node.attrib['id'] = str(id)
+        if self.package:
+            node.attrib['package'] = str(self.package)
+        elif force_package:
+            node.attrib['package'] = ""
+        return node
 
     def append(self, test):
         """Add a test and aggregate its result"""

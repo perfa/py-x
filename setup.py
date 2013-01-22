@@ -18,6 +18,7 @@ setup(name="Py-X",
           "lettuce"
       ],
       install_requires=[
+          "lxml"
       ],
       classifiers = [
           'Development Status :: 1 - Pre-alpha',
