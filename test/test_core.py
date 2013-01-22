@@ -1,4 +1,5 @@
 import os
+from pkg_resources import resource_string
 from unittest import TestCase
 from lxml import etree
 
@@ -7,8 +8,8 @@ from hamcrest import assert_that, is_, contains_string, has_item, has_length
 
 from py_x.core import Xunit, XunitSuite, XunitTest
 
-XSD_FILE = os.path.join(os.path.dirname(__file__), '..', 'py_x', 'data', 'xunit.xsd')
-SCHEMA = etree.XMLSchema(etree.XML(open(XSD_FILE).read()))
+XSD_FILE = resource_string('py_x', '/data/xunit.xsd')
+SCHEMA = etree.XMLSchema(etree.XML(XSD_FILE))
 PARSER = etree.XMLParser(schema=SCHEMA)
 
 

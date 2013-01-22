@@ -3,10 +3,12 @@ import os
 from lxml import etree
 from lettuce import step, world, before
 from hamcrest import assert_that, is_, has_item, has_length
+from pkg_resources import resource_string
+
 import py_x
 
-XSD_FILE = os.path.join(os.path.dirname(__file__), '..', 'py_x', 'data', 'xunit.xsd')
-SCHEMA = etree.XMLSchema(etree.XML(open(XSD_FILE).read()))
+XSD_FILE = resource_string('py_x', '/data/xunit.xsd')
+SCHEMA = etree.XMLSchema(etree.XML(XSD_FILE))
 PARSER = etree.XMLParser(schema=SCHEMA)
 
 

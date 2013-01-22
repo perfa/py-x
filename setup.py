@@ -7,13 +7,15 @@ LONG_DESCRIPTION = open(os.path.join(os.path.dirname(__file__), 'README.md')).re
 
 setup(name="Py-X",
       version="0.1",
+      zip_safe=True,
       keywords="py-x unit test testing unittest unittesting xunit nunit junit xml",
       author="Per Fagrell",
       author_email="per.fagrell@gmail.com",
       license="PSF",
+      package_data = {'': ['data/*.xsd']},
       test_suite="nose.collector",
       tests_require=[
-          "pyhamcrest",
+          "PyHamcrest",
           "mock",
           "lettuce"
       ],
