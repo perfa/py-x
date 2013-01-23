@@ -20,11 +20,17 @@ def setup(feature):
 
 @step(u'And the test-suite has the following attributes:')
 def and_the_test_suite_has_the_following_attributes(step):
+    attr_2_node = {"errors": "error",
+                   "failures": "failure",
+                   "skipped": "skipped"}
     for attribute_dict in step.hashes:
         name = attribute_dict['name']
         value = attribute_dict['value']
         assert_that(world.e_xml.attrib[name], is_(value),
                    'Expected attribute "%s" to be "%s"' % (name, value))
+        if name == 'tests': continue
+        nodes = world.e_xml.xpath('//%s' % attr_2_node[name])
+        assert_that(nodes, has_length(int(value)))
 
 @step(u'And it contains (\d+) test tags?')
 def and_it_contains_x_test_tags(step, count):

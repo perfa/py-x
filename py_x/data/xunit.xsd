@@ -42,7 +42,7 @@
   </xs:element>
   <xs:complexType name="testsuite">
     <xs:annotation>
-      <xs:documentation xml:lang="en">Contains the results of exexuting a testsuite</xs:documentation>
+      <xs:documentation xml:lang="en">Contains the results of executing a testsuite</xs:documentation>
     </xs:annotation>
     <xs:sequence>
       <xs:element name="testcase" minOccurs="0" maxOccurs="unbounded">
@@ -60,7 +60,7 @@
                         <xs:documentation xml:lang="en">The error message. e.g., if a java exception is thrown, the return value of getMessage()</xs:documentation>
                       </xs:annotation>
                     </xs:attribute>
-                    <xs:attribute name="type" type="xs:string" use="required">
+                    <xs:attribute name="type" type="xs:string" use="optional">
                       <xs:annotation>
                         <xs:documentation xml:lang="en">The type of error that occured. e.g., if a java execption is thrown the full class name of the exception.</xs:documentation>
                       </xs:annotation>
@@ -81,7 +81,7 @@
                         <xs:documentation xml:lang="en">The message specified in the assert</xs:documentation>
                       </xs:annotation>
                     </xs:attribute>
-                    <xs:attribute name="type" type="xs:string" use="required">
+                    <xs:attribute name="type" type="xs:string" use="optional">
                       <xs:annotation>
                         <xs:documentation xml:lang="en">The type of the assert.</xs:documentation>
                       </xs:annotation>
@@ -97,7 +97,7 @@
               <xs:complexType>
                 <xs:simpleContent>
                   <xs:extension base="pre-string">
-                    <xs:attribute name="type" type="xs:string" use="required">
+                    <xs:attribute name="type" type="xs:string" use="optional">
                       <xs:annotation>
                         <xs:documentation xml:lang="en">Skip type.</xs:documentation>
                       </xs:annotation>

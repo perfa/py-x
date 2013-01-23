@@ -83,10 +83,9 @@ class TestXunitTest(TestCase):
         assert_that(xml.attrib['name'], is_("Nescobar_aloplop"))
         
     def test_should_report_test_class_in_xml_as_class_attribute(self):
-        test = XunitTest("test")
+        test = XunitTest("test", class_name="TestObject")
         xml = test.to_xml()
-        # TODO: we don't have a class attribute yet 
-        assert_that(xml.attrib['classname'], is_(""))
+        assert_that(xml.attrib['classname'], is_("TestObject"))
 
     def test_should_reporttime_in_xml_as_time_attribute(self):
         test = XunitTest("test")
@@ -96,6 +95,23 @@ class TestXunitTest(TestCase):
         test = XunitTest("test", time=4.4)
         xml = test.to_xml()
         assert_that(xml.attrib['time'], is_("4.4"))
+
+    def test_should_create_error_node_with_message_in_xml_if_error_test(self):
+        test = XunitTest("test", error=True)
+        xml = test.to_xml()
+        assert_that(xml[0].tag, is_("error"))
+        assert_that(xml[0].attrib['message'], is_(""))
+
+    def test_should_create_failure_node_with_message_in_xml_if_failed_test(self):
+        test = XunitTest("test", failed=True)
+        xml = test.to_xml()
+        assert_that(xml[0].tag, is_("failure"))
+        assert_that(xml[0].attrib['message'], is_(""))
+
+    def test_should_create_skipped_node_with_message_in_xml_if_skipped_test(self):
+        test = XunitTest("test", skipped=True)
+        xml = test.to_xml()
+        assert_that(xml[0].tag, is_("skipped"))
 
 
 class TestXunitSuite(TestCase):

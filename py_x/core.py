@@ -120,12 +120,33 @@ class XunitTest(object):
 
     def to_xml(self):
         """Create the XML representation of this Xunit test"""
+        subnodes = {"error": self._error_node,
+                   "failed": self._failure_node,
+                   "skipped": self._skipped_node}
         node = etree.Element("testcase")
         node.attrib['name'] = self.name
-        node.attrib['classname'] = ""
+        node.attrib['classname'] = str(self.class_name)
         node.attrib['time'] = str(self.time)
+        if self.status in subnodes:
+            node.append(subnodes[self.status]())
         return node
+ 
+    def _error_node(self):
+        """Create error XML node for this test"""
+        error_node = etree.Element("error")
+        error_node.attrib["message"] = ""
+        return error_node
 
+    def _failure_node(self):
+        """Create failure XML node for this test"""
+        failure_node = etree.Element("failure")
+        failure_node.attrib["message"] = ""
+        return failure_node
+
+    def _skipped_node(self):
+        """Create skipped XML node for this test"""
+        return etree.Element("skipped")
+ 
     @property
     def passed(self):
         """True if status is not error, failed or skipped"""
