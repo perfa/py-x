@@ -8,7 +8,7 @@ import py_x
 class TestFromYaml(object):
     def test_should_pick_up_title_as_suite_name(self):
         input = """
-        - yaml_test_suite:
+        yaml_test_suite:
 
         """
         result = from_yaml(input)
@@ -18,9 +18,9 @@ class TestFromYaml(object):
 
     def test_should_create_test_suite_for_each_top_level_entry(self):
         input = """
-        - yaml_test_suite:
+        yaml_test_suite:
 
-        - xml_test_suite:
+        xml_test_suite:
 
         """
         result = from_yaml(input)
@@ -28,9 +28,9 @@ class TestFromYaml(object):
 
     def test_should_create_tests_from_name_attribute_in_sublist(self):
         input = """
-        - yaml_test_suite:
-            -
-              name: my_awesome_test
+        yaml_test_suite:
+            my_awesome_test:
+
         """
         result = from_yaml(input)
 
@@ -38,11 +38,10 @@ class TestFromYaml(object):
 
     def test_should_mark_tests_with_failed_status_as_such(self):
         input = """
-        - yaml_test_suite:
-            -
-             name: failing_test
-             status: failed
-             message: I had a failure
+        yaml_test_suite:
+          failing_test:
+            status: failed
+            message: I had a failure
         """
         result = from_yaml(input)
 
@@ -50,11 +49,10 @@ class TestFromYaml(object):
 
     def test_should_mark_tests_with_error_status_as_such(self):
         input = """
-        - yaml_test_suite:
-            -
-             name: erronous_test
-             status: error
-             message: I had an error
+        yaml_test_suite:
+          erronous_test:
+            status: error
+            message: I had an error
         """
         result = from_yaml(input)
 
@@ -63,11 +61,10 @@ class TestFromYaml(object):
 
     def test_should_mark_tests_with_skipped_status_as_such(self):
         input = """
-        - yaml_test_suite:
-            -
-             name: known_bad_test
-             status: skipped
-             message: I'm known bad
+        yaml_test_suite:
+          known_bad_test:
+            status: skipped
+            message: I'm known bad
         """
         result = from_yaml(input)
 

@@ -4,7 +4,7 @@ Feature: Output is valid XUnit XML.
   Scenario: Creating empty suite generates valid testsuite tag
     Given the following yaml:
     """
-    - test_suite_no_1:
+    test_suite_no_1:
 
     """
     When I convert it to XML
@@ -14,8 +14,8 @@ Feature: Output is valid XUnit XML.
   Scenario: Creating several empty testsuites generates valid testsuites/testsuite tags
     Given the following yaml:
     """
-    - test_suite_no_1: []
-    - test_suite_no_2: []
+    test_suite_no_1: {} 
+    test_suite_no_2: {}
     """
     When I convert it to XML
     Then it is valid according to the schema
@@ -26,19 +26,15 @@ Feature: Output is valid XUnit XML.
   Scenario: A test-suite with tests reports and appends them correctly.
     Given the following yaml:
     """
-    - test_suite_1:"
-    "  -"
-    "    name: test"
-    "  -"
-    "    name: errord_test"
+    test_suite_1:"
+    "  test: {}"
+    "  errord_test:"
     "    status: error"
     "    message: caused an error"
-    "  -"
-    "    name: failed_test"
+    "  failed_test:"
     "    status: failed"
     "    message: caused some failure"
-    "  -"
-    "    name: skipped_test"
+    "  skipped_test:" 
     "    status: skipped"
     "    message: not implemented yet
     """

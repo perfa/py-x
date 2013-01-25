@@ -9,18 +9,17 @@ def from_yaml(yaml_input):
     report_description = yaml.load(yaml_input)
     report = Xunit()
 
-    for test_suite in report_description:
-        name, data = test_suite.items()[0]
-        suite = XunitSuite(name)
+    for test_suite, data in report_description.items():
+        suite = XunitSuite(test_suite)
         report.append(suite)
 
         if data is None:
-            continue 
+            continue
 
-        for test in data:
-            test_result = XunitTest(test['name'])
-            if 'status' in test:
-                test_result.status = test['status']
+        for test, test_data in data.items():
+            test_result = XunitTest(test)
+            if test_data and 'status' in test_data:
+                test_result.status = test_data['status']
             suite.append(test_result)
 
     return report

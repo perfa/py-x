@@ -8,7 +8,7 @@ by existing standard solutions such as Jenkins etc.
   Scenario: An empty testsuite
     Given a yaml test suite like this:
        """
-       - test_suite_name:
+       test_suite_name:
 
        """
    When I convert it to XML
@@ -19,19 +19,16 @@ by existing standard solutions such as Jenkins etc.
   Scenario: Simple tests
     Given a yaml test suite like this:
        """
-      "- Various_tests:"
-      "   -"
-      "     name: passing_test"
-      "   -"
-      "     name: failing_test"
+      "Various_tests:"
+      "   passing_test:"
+      ""
+      "   failing_test:"
       "     status: failed"
       "     message: Test failed"
-      "   -"
-      "     name: errord_test"
+      "   errord_test:"
       "     status: error"
       "     message: Test error"
-      "   -"
-      "     name: skipped_test"
+      "   skipped_test:"
       "     status: skipped"
       "     message: Not implemented yet"
       "
