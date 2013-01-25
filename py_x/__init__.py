@@ -1,3 +1,4 @@
+from __future__ import print_function
 import yaml
 from py_x.core import Xunit, XunitSuite, XunitTest
 
@@ -17,7 +18,7 @@ def from_yaml(yaml_input):
             continue
 
         for test, test_data in data.items():
-            test_result = XunitTest(test)
+            test_result = XunitTest(test, test_suite)
             if test_data and 'status' in test_data:
                 test_result.status = test_data['status']
             suite.append(test_result)
@@ -25,3 +26,13 @@ def from_yaml(yaml_input):
     return report
 
 
+def main():
+    import sys
+    input = sys.stdin.read()
+    output = from_yaml(input).to_string()
+
+    print(output)
+
+
+if __name__ == "__main__":
+    main()

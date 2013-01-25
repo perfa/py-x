@@ -12,7 +12,7 @@ setup(name="Py-X",
       author="Per Fagrell",
       author_email="per.fagrell@gmail.com",
       license="PSF",
-      package_data = {'': ['data/*.xsd']},
+      package_data={'': ['data/*.xsd']},
       test_suite="nose.collector",
       tests_require=[
           "PyHamcrest",
@@ -20,9 +20,15 @@ setup(name="Py-X",
           "lettuce"
       ],
       install_requires=[
-          "lxml"
+          "lxml",
+          "PyYaml"
       ],
-      classifiers = [
+      entry_points={
+          'console_scripts': [
+              'yaml2xunit = py_x:main'
+          ]
+        },
+      classifiers=[
           'Development Status :: 1 - Pre-alpha',
           'Intended Audience :: Developers',
           'Topic :: Software Development'
